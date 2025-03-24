@@ -217,6 +217,28 @@ h1, h2, h3, h4, h5, h6 {
     object-fit: cover;
 }
 
+/* Comic logo styling */
+.comic-logo-display {
+    width: 80%;
+    height: 80%;
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: contain;
+    transition: transform var(--transition-speed);
+}
+
+.comic-card:hover .comic-logo-display {
+    transform: scale(1.1);
+}
+
+.comic-logo-large {
+    width: 90%;
+    height: 90%;
+    max-width: 250px;
+    max-height: 250px;
+    object-fit: contain;
+}
+
 .comic-card .card-info {
     position: absolute;
     bottom: 0;

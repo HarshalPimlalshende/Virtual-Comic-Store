@@ -9,8 +9,9 @@
         <div class="col-md-4 mb-4">
             <div class="bg-card p-3 rounded shadow-sm text-center">
                 <div class="comic-cover-container bg-secondary mb-3 d-flex align-items-center justify-content-center" style="height: 350px;">
-                    <!-- Placeholder for comic cover -->
-                    <i class="fas fa-book fa-5x text-light"></i>
+                    <!-- Comic logo based on logo_id -->
+                    <img src="{{ url_for('static', filename='images/logo' + (comic.logo_id|string if comic.logo_id else '1') + '.svg') }}" 
+                         alt="{{ comic.title }}" class="comic-logo-large">
                 </div>
                 
                 <div class="d-grid gap-2 mt-3">
