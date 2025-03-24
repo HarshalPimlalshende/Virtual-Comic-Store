@@ -4,7 +4,7 @@ import logging
 from flask import render_template, request, redirect, url_for, flash, session, abort, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_login import login_user, logout_user, current_user, login_required
-from app import app
+from app import app, db
 from models import User, Comic, Review
 
 # Configure upload folder
@@ -23,7 +23,7 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    recent_comics = sorted(Comic.get_all(), key=lambda x: x.upload_date, reverse=True)[:10]
+    recent_comics = Comic.query.order_by(Comic.upload_date.desc()).limit(10).all()
     return render_template('index.html', comics=recent_comics)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -90,7 +90,7 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    user_comics = Comic.get_by_owner(current_user.id)
+    user_comics = Comic.query.filter_by(owner_id=current_user.id).all()
     return render_template('profile.html', user=current_user, comics=user_comics)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -142,20 +142,19 @@ def upload_comic():
 @app.route('/library')
 @login_required
 def library():
-    user_library = [Comic.get_by_id(comic_id) for comic_id in current_user.library]
-    # Filter out any None values that might occur if a comic was deleted
-    user_library = [comic for comic in user_library if comic]
+    # The library_comics relationship already takes care of retrieving the comics
+    user_library = current_user.library_comics.all()
     return render_template('library.html', comics=user_library)
 
 @app.route('/comic/<comic_id>')
 def comic_details(comic_id):
-    comic = Comic.get_by_id(comic_id)
+    comic = Comic.query.get(comic_id)
     if not comic:
         flash('Comic not found', 'danger')
         return redirect(url_for('index'))
     
-    reviews = Review.get_by_comic(comic_id)
-    owner = User.get_by_id(comic.owner_id)
+    reviews = Review.query.filter_by(comic_id=comic_id).order_by(Review.created_at.desc()).all()
+    owner = User.query.get(comic.owner_id)
     
     # Increment view count
     comic.increment_views()
@@ -164,7 +163,7 @@ def comic_details(comic_id):
 
 @app.route('/comic/<comic_id>/read')
 def read_comic(comic_id):
-    comic = Comic.get_by_id(comic_id)
+    comic = Comic.query.get(comic_id)
     if not comic:
         flash('Comic not found', 'danger')
         return redirect(url_for('index'))
@@ -233,8 +232,13 @@ def search():
     results = []
     
     if query:
-        for comic in Comic.get_all():
-            if query in comic.title.lower() or query in comic.description.lower():
-                results.append(comic)
+        # Using SQLAlchemy's LIKE for case-insensitive search
+        search_term = f"%{query}%"
+        results = Comic.query.filter(
+            db.or_(
+                db.func.lower(Comic.title).like(search_term),
+                db.func.lower(Comic.description).like(search_term)
+            )
+        ).all()
     
     return render_template('index.html', comics=results, search_query=query)
