@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isMobile = window.innerWidth < 768,
         pageFlipping = false,
         cachedPages = {},
+        pagePreloading = {}, // Track pages currently being preloaded
         autoHideTimeout = null;
     
     // Create book container
@@ -40,25 +41,50 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to preload a page and cache it
     function preloadPage(num) {
-        if (num < 1 || num > pdfDoc.numPages || cachedPages[num]) return;
+        if (num < 1 || num > pdfDoc.numPages || cachedPages[num] || pagePreloading[num]) return;
         
-        pdfDoc.getPage(num).then(function(page) {
-            const viewport = page.getViewport({scale: scale});
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport
-            };
-            
-            page.render(renderContext).promise.then(() => {
-                cachedPages[num] = canvas;
+        // Track pages being preloaded to avoid duplicate requests
+        pagePreloading[num] = true;
+        
+        // Use lower resolution for preloaded pages to speed up initial display
+        // They'll be replaced with full resolution when actually viewed
+        const preloadScale = scale * 0.8;
+        
+        // Queue preload with a slight delay to prioritize visible pages
+        setTimeout(() => {
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({scale: preloadScale});
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                
+                page.render(renderContext).promise.then(() => {
+                    cachedPages[num] = canvas;
+                    delete pagePreloading[num];
+                    
+                    // Continue preloading next pages in sequence
+                    if (num < pdfDoc.numPages) {
+                        preloadPage(num + 1);
+                    }
+                    if (num > 1) {
+                        preloadPage(num - 1);
+                    }
+                }).catch(err => {
+                    console.warn('Error preloading page', num, err);
+                    delete pagePreloading[num];
+                });
+            }).catch(err => {
+                console.warn('Error getting page for preload', num, err);
+                delete pagePreloading[num];
             });
-        });
+        }, 100); // Short delay to prioritize visible content
     }
     
     // Function to render current page(s)
@@ -70,12 +96,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         pageRendering = true;
         
-        // Clear the container
-        bookContainer.innerHTML = '';
+        // Create new page spread container
+        const newPageSpread = document.createElement('div');
+        newPageSpread.className = 'page-spread';
         
-        // Create page spread container
-        const pageSpread = document.createElement('div');
-        pageSpread.className = 'page-spread';
+        // Keep track of whether we're rendering new elements
+        let renderedElements = 0;
+        let expectedElements = 0;
         
         // For double page mode on larger screens
         if (isDoublePage && !isMobile) {
@@ -101,22 +128,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 rightPageNum = null;
             }
             
+            // Count expected elements for rendering completion tracking
+            if (leftPageNum) expectedElements++;
+            if (rightPageNum) expectedElements++;
+            
             // Render left page if it exists
             if (leftPageNum) {
-                renderSinglePage(leftPageNum, pageSpread, 'left-page');
-                
-                // Preload adjacent pages
+                // Preload pages beforehand
                 preloadPage(leftPageNum - 2);
                 preloadPage(leftPageNum - 1);
+                
+                if (renderSinglePage(leftPageNum, newPageSpread, 'left-page')) {
+                    renderedElements++;
+                }
             }
             
             // Render right page if it exists
             if (rightPageNum) {
-                renderSinglePage(rightPageNum, pageSpread, 'right-page');
-                
-                // Preload adjacent pages
+                // Preload pages beforehand
                 preloadPage(rightPageNum + 1);
                 preloadPage(rightPageNum + 2);
+                
+                if (renderSinglePage(rightPageNum, newPageSpread, 'right-page')) {
+                    renderedElements++;
+                }
             }
             
             // Update displayed page number to show the current spread
@@ -132,40 +167,69 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             // Single page mode - just render the current page
-            renderSinglePage(pageNum, pageSpread, 'single-page');
-            document.getElementById('page-num').textContent = pageNum;
+            expectedElements = 1;
             
-            // Preload adjacent pages
+            // Preload adjacent pages first
             preloadPage(pageNum - 1);
             preloadPage(pageNum + 1);
+            
+            if (renderSinglePage(pageNum, newPageSpread, 'single-page')) {
+                renderedElements++;
+            }
+            
+            document.getElementById('page-num').textContent = pageNum;
         }
         
-        bookContainer.appendChild(pageSpread);
-        document.getElementById('page-count').textContent = pdfDoc.numPages;
-        pageRendering = false;
-        
-        // Process any pending page render
-        if (pageNumPending !== null) {
-            renderCurrentPages();
-            pageNumPending = null;
+        // Only replace the old content once all new content is ready
+        if (renderedElements === expectedElements) {
+            // Use a fade transition to avoid white flash
+            newPageSpread.style.opacity = '0';
+            
+            // Clear the container and add new content
+            bookContainer.innerHTML = '';
+            bookContainer.appendChild(newPageSpread);
+            
+            // Fade in the new content
+            setTimeout(() => {
+                newPageSpread.style.transition = 'opacity 0.15s ease-in';
+                newPageSpread.style.opacity = '1';
+            }, 20);
+            
+            document.getElementById('page-count').textContent = pdfDoc.numPages;
+            pageRendering = false;
+            
+            // Process any pending page render
+            if (pageNumPending !== null) {
+                setTimeout(() => {
+                    renderCurrentPages();
+                    pageNumPending = null;
+                }, 50);
+            }
+            
+            // Auto-hide header after 3 seconds of inactivity
+            clearTimeout(autoHideTimeout);
+            showHeader();
+            autoHideTimeout = setTimeout(hideHeader, 3000);
+        } else {
+            // If not all elements were rendered, retry shortly
+            setTimeout(() => {
+                pageRendering = false;
+                renderCurrentPages();
+            }, 50);
         }
-        
-        // Auto-hide header after 3 seconds of inactivity
-        clearTimeout(autoHideTimeout);
-        showHeader();
-        autoHideTimeout = setTimeout(hideHeader, 3000);
     }
     
-    // Function to render a single page
+    // Function to render a single page, returns true if rendered immediately from cache
     function renderSinglePage(num, container, className) {
         if (cachedPages[num]) {
             // Use cached page if available
             const clonedCanvas = cachedPages[num].cloneNode(true);
             clonedCanvas.className = 'page-canvas ' + className;
             container.appendChild(clonedCanvas);
-            return;
+            return true; // Immediately rendered
         }
         
+        // Start asynchronous rendering
         pdfDoc.getPage(num).then(function(page) {
             const viewport = page.getViewport({scale: scale});
             const canvas = document.createElement('canvas');
@@ -180,12 +244,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 viewport: viewport
             };
             
+            // Create a background placeholder while rendering
+            canvas.style.background = '#f0f0f0';
             container.appendChild(canvas);
             
             page.render(renderContext).promise.then(() => {
+                // Store in cache for future use
                 cachedPages[num] = canvas.cloneNode(true);
+                
+                // Animation to fade in the rendered page
+                canvas.style.opacity = '0.9';
+                canvas.style.transition = 'opacity 0.2s ease-in';
+                setTimeout(() => {
+                    canvas.style.opacity = '1';
+                    canvas.style.background = 'none';
+                }, 50);
             });
+        }).catch(err => {
+            console.error('Error rendering page:', err);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'page-canvas error-page ' + className;
+            errorDiv.textContent = 'Error loading page ' + num;
+            container.appendChild(errorDiv);
         });
+        
+        return false; // Asynchronously rendering
     }
     
     // Function to go to previous page(s)
