@@ -498,6 +498,42 @@ footer {
     color: #999;
 }
 
+/* Logo selection styling */
+.logo-selection {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.logo-option {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.logo-preview {
+    width: 60px;
+    height: 60px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    padding: 5px;
+    transition: all var(--transition-speed);
+    background-color: var(--card-bg);
+}
+
+input[type="radio"]:checked + label .logo-preview {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px 2px rgba(30, 144, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.form-check-input {
+    opacity: 0.5;
+}
+
+.form-check-input:checked {
+    opacity: 1;
+}
+
 /* Modal styles */
 .modal-content {
     background-color: var(--card-bg);

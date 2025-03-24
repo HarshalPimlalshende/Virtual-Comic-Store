@@ -73,15 +73,17 @@ class Comic(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     upload_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     views = db.Column(db.Integer, default=0)
+    logo_id = db.Column(db.Integer, default=1) # Logo ID (1-5)
     
     # Relationships
     reviews = db.relationship('Review', backref='comic', lazy='dynamic', cascade='all, delete-orphan')
     
-    def __init__(self, title, description, filename, owner_id):
+    def __init__(self, title, description, filename, owner_id, logo_id=None):
         self.title = title
         self.description = description
         self.filename = filename
         self.owner_id = owner_id
+        self.logo_id = logo_id
     
     def save(self):
         db.session.add(self)

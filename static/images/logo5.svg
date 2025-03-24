@@ -1,0 +1,11 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .comic-logo { font-family: 'Comic Sans MS', cursive, sans-serif; }
+  </style>
+  <!-- Vintage comic book style logo -->
+  <rect x="5" y="5" width="90" height="90" rx="10" ry="10" fill="#FF5252" stroke="#0A1929" stroke-width="2"/>
+  <rect x="15" y="15" width="70" height="70" rx="5" ry="5" fill="#FFEB3B" stroke="#0A1929" stroke-width="2"/>
+  <text x="50" y="45" class="comic-logo" text-anchor="middle" fill="#0A1929" font-weight="bold" font-size="20">RETRO</text>
+  <text x="50" y="65" class="comic-logo" text-anchor="middle" fill="#0A1929" font-weight="bold" font-size="16">COMICS</text>
+  <path d="M15 75 L85 75" fill="none" stroke="#0A1929" stroke-width="2" stroke-dasharray="5,5"/>
+</svg>

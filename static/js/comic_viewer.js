@@ -324,12 +324,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Swipe gesture navigation using Hammer.js
     const hammer = new Hammer(pdfContainer);
     hammer.on('swipeleft', function() {
+        // Zoom in once for each swipe
+        zoomIn(0.1); // Smaller increment for swipe zoom
+        // Navigate to next page
         nextPage();
     });
     
     hammer.on('swiperight', function() {
+        // Zoom in once for each swipe
+        zoomIn(0.1); // Smaller increment for swipe zoom
+        // Navigate to previous page
         prevPage();
     });
+    
+    // Helper function for zooming in
+    function zoomIn(increment) {
+        // Don't exceed maximum zoom level
+        if (scale >= 3.0) return;
+        scale += increment || 0.2;
+        // Clear cache when zoom changes
+        cachedPages = {};
+        renderCurrentPages();
+    }
     
     // Detect tap on left/right page areas
     leftOverlay.addEventListener('click', prevPage);
@@ -359,10 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set up zoom controls
     document.getElementById('zoom-in').addEventListener('click', function() {
-        scale += 0.2;
-        // Clear cache when zoom changes
-        cachedPages = {};
-        renderCurrentPages();
+        zoomIn(0.2);
     });
     
     document.getElementById('zoom-out').addEventListener('click', function() {

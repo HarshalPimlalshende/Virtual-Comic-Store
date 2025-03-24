@@ -35,6 +35,52 @@
                         <small class="text-muted">Maximum file size: 16MB</small>
                     </div>
                     
+                    <div class="mb-4">
+                        <label for="logo_id" class="form-label">Choose Comic Logo</label>
+                        <div class="row logo-selection">
+                            <div class="col">
+                                <div class="form-check logo-option">
+                                    <input class="form-check-input" type="radio" name="logo_id" id="logo1" value="1" checked>
+                                    <label class="form-check-label" for="logo1">
+                                        <img src="{{ url_for('static', filename='images/logo1.svg') }}" alt="Logo 1" class="logo-preview">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check logo-option">
+                                    <input class="form-check-input" type="radio" name="logo_id" id="logo2" value="2">
+                                    <label class="form-check-label" for="logo2">
+                                        <img src="{{ url_for('static', filename='images/logo2.svg') }}" alt="Logo 2" class="logo-preview">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check logo-option">
+                                    <input class="form-check-input" type="radio" name="logo_id" id="logo3" value="3">
+                                    <label class="form-check-label" for="logo3">
+                                        <img src="{{ url_for('static', filename='images/logo3.svg') }}" alt="Logo 3" class="logo-preview">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check logo-option">
+                                    <input class="form-check-input" type="radio" name="logo_id" id="logo4" value="4">
+                                    <label class="form-check-label" for="logo4">
+                                        <img src="{{ url_for('static', filename='images/logo4.svg') }}" alt="Logo 4" class="logo-preview">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check logo-option">
+                                    <input class="form-check-input" type="radio" name="logo_id" id="logo5" value="5">
+                                    <label class="form-check-label" for="logo5">
+                                        <img src="{{ url_for('static', filename='images/logo5.svg') }}" alt="Logo 5" class="logo-preview">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-upload me-2"></i> Upload Comic

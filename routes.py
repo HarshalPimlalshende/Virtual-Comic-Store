@@ -119,12 +119,23 @@ def upload_comic():
                 
                 title = request.form.get('title')
                 description = request.form.get('description')
+                logo_id = request.form.get('logo_id', 1)
+                
+                # Convert logo_id to int, default to 1 if invalid
+                try:
+                    logo_id = int(logo_id)
+                    # Ensure logo_id is between 1-5
+                    if logo_id < 1 or logo_id > 5:
+                        logo_id = 1
+                except (ValueError, TypeError):
+                    logo_id = 1
                 
                 comic = Comic(
                     title=title,
                     description=description,
                     filename=unique_filename,
-                    owner_id=current_user.id
+                    owner_id=current_user.id,
+                    logo_id=logo_id
                 )
                 db.session.add(comic)
                 db.session.commit()

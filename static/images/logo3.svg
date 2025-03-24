@@ -1,0 +1,10 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .comic-logo { font-family: 'Comic Sans MS', cursive, sans-serif; }
+  </style>
+  <!-- Action explosion star logo -->
+  <path d="M50 5 L57 35 L90 35 L63 55 L75 85 L50 65 L25 85 L37 55 L10 35 L43 35 Z" fill="#9C27B0" stroke="#0A1929" stroke-width="2"/>
+  <circle cx="50" cy="50" r="20" fill="#FFD700" stroke="#0A1929" stroke-width="2"/>
+  <text x="50" y="55" class="comic-logo" text-anchor="middle" fill="#0A1929" font-weight="bold" font-size="12">POW!</text>
+  <path d="M25 20 L30 10 M35 15 L40 5 M65 15 L70 5 M75 20 L80 10" stroke="#FF9800" stroke-width="2"/>
+</svg>
