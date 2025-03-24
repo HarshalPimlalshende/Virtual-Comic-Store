@@ -61,8 +61,9 @@
                 <a href="{{ url_for('comic_details', comic_id=comic.id) }}">
                     <div class="card">
                         <div class="card-img-container bg-secondary d-flex align-items-center justify-content-center">
-                            <!-- Placeholder for comic cover -->
-                            <i class="fas fa-book fa-5x text-light"></i>
+                            <!-- Comic logo based on logo_id -->
+                            <img src="{{ url_for('static', filename='images/logo' + (comic.logo_id|string if comic.logo_id else '1') + '.svg') }}" 
+                                 alt="{{ comic.title }}" class="comic-logo-display">
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">{{ comic.title }}</h5>
@@ -108,8 +109,9 @@
                     <a href="{{ url_for('comic_details', comic_id=comic.id) }}">
                         <div class="card">
                             <div class="card-img-container bg-secondary d-flex align-items-center justify-content-center">
-                                <!-- Placeholder for comic cover -->
-                                <i class="fas fa-book fa-5x text-light"></i>
+                                <!-- Comic logo based on logo_id -->
+                                <img src="{{ url_for('static', filename='images/logo' + (comic.logo_id|string if comic.logo_id else '1') + '.svg') }}" 
+                                     alt="{{ comic.title }}" class="comic-logo-display">
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ comic.title }}</h5>
