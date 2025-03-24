@@ -1,0 +1,538 @@
+/* Netflix-inspired Dark Theme for Comic Reading Platform */
+
+/* Global Variables */
+:root {
+    --primary-bg: #141414;       /* Netflix black */
+    --secondary-bg: #1F4068;     /* Medium dark blue */
+    --accent-color: #E50914;     /* Netflix red */
+    --text-color: #FFFFFF;       /* White */
+    --card-bg: #181818;          /* Dark grey */
+    --hover-bg: #232323;         /* Slightly lighter grey for hover states */
+    --border-color: #333333;     /* Border color */
+    --success-color: #46B04A;    /* Green for success messages */
+    --warning-color: #E6A23C;    /* Yellow for warnings */
+    --danger-color: #F56C6C;     /* Red for errors */
+    --info-color: #909399;       /* Grey for info messages */
+    --font-main: 'Roboto', 'Netflix Sans', sans-serif;
+    --standard-padding: 16px;    /* Standard padding */
+    --transition-speed: 0.3s;    /* Transition speed for effects */
+}
+
+/* Base styles */
+body {
+    font-family: var(--font-main);
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
+}
+
+a:hover {
+    color: var(--accent-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    font-weight: 700;
+}
+
+/* Bootstrap overrides */
+.navbar {
+    background-color: var(--primary-bg) !important;
+    padding: var(--standard-padding);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    color: var(--accent-color) !important;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--text-color);
+    transition: all var(--transition-speed) ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--accent-color);
+}
+
+.dropdown-menu {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-color);
+}
+
+.dropdown-item:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+}
+
+.btn {
+    border-radius: 2px;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+    background-color: darken(var(--accent-color), 10%);
+    border-color: darken(var(--accent-color), 10%);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-bg);
+    border-color: var(--secondary-bg);
+}
+
+.btn-outline-light {
+    color: var(--text-color);
+    border-color: var(--text-color);
+}
+
+.btn-outline-light:hover {
+    background-color: var(--text-color);
+    color: var(--primary-bg);
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 4px;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: scale(1.04);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.card-body {
+    padding: var(--standard-padding);
+}
+
+.card-title {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.card-subtitle {
+    color: #ccc;
+    margin-bottom: 0.75rem;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+/* Form styling */
+.form-control {
+    background-color: #333;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 2px;
+}
+
+.form-control:focus {
+    background-color: #444;
+    color: var(--text-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+}
+
+.form-control::placeholder {
+    color: #999;
+}
+
+/* Alert styling */
+.alert {
+    border: none;
+    border-radius: 2px;
+    padding: 12px var(--standard-padding);
+}
+
+.alert-success {
+    background-color: rgba(70, 176, 74, 0.2);
+    color: var(--success-color);
+}
+
+.alert-warning {
+    background-color: rgba(230, 162, 60, 0.2);
+    color: var(--warning-color);
+}
+
+.alert-danger {
+    background-color: rgba(245, 108, 108, 0.2);
+    color: var(--danger-color);
+}
+
+.alert-info {
+    background-color: rgba(144, 147, 153, 0.2);
+    color: var(--info-color);
+}
+
+/* Comic Cards Grid */
+.comics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: var(--standard-padding);
+}
+
+.comic-card {
+    position: relative;
+    height: 100%;
+}
+
+.comic-card .card-img-container {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+}
+
+.comic-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.comic-card .card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: var(--standard-padding);
+    transition: all var(--transition-speed);
+}
+
+.comic-card:hover .card-info {
+    background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.8), transparent);
+}
+
+.comic-rating {
+    color: #FFD700;
+}
+
+/* Comic Detail Page */
+.comic-detail-container {
+    padding: var(--standard-padding);
+}
+
+.comic-cover {
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 100%;
+    height: auto;
+}
+
+.comic-info {
+    padding: var(--standard-padding);
+}
+
+.comic-description {
+    margin-bottom: 1.5rem;
+}
+
+.comic-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.comic-stats span {
+    display: flex;
+    align-items: center;
+}
+
+.comic-stats i {
+    margin-right: 5px;
+}
+
+/* Reviews Section */
+.reviews-section {
+    margin-top: 2rem;
+}
+
+.review-card {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.review-user {
+    font-weight: 600;
+}
+
+.review-date {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Star Rating */
+.star-rating {
+    color: #FFD700;
+    font-size: 1.2rem;
+}
+
+/* Comic Viewer */
+.comic-viewer-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.viewer-header {
+    padding: 10px var(--standard-padding);
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.viewer-title {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.viewer-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.viewer-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+}
+
+#pdf-viewer {
+    width: 100%;
+    height: calc(100vh - 50px);
+}
+
+/* Responsiveness */
+@media (max-width: 992px) {
+    .comics-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .comics-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .comics-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .comic-card .card-info {
+        padding: 10px;
+    }
+    
+    .comic-card .card-title {
+        font-size: 0.9rem;
+    }
+}
+
+/* Footer */
+footer {
+    background-color: var(--primary-bg);
+    padding: var(--standard-padding);
+    text-align: center;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Utility Classes */
+.text-accent {
+    color: var(--accent-color);
+}
+
+.bg-card {
+    background-color: var(--card-bg);
+}
+
+.rounded-sm {
+    border-radius: 2px;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Search bar */
+.search-form {
+    position: relative;
+    margin-right: 1rem;
+}
+
+.search-form .form-control {
+    padding-right: 35px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-color);
+}
+
+.search-form .search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+/* Loading spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner-border {
+    color: var(--accent-color);
+}
+
+/* Profile page styling */
+.profile-header {
+    background-color: var(--card-bg);
+    padding: var(--standard-padding);
+    margin-bottom: 2rem;
+    border-radius: 4px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.profile-stat {
+    text-align: center;
+}
+
+.profile-stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: block;
+}
+
+.profile-stat-label {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Upload page styling */
+.upload-container {
+    background-color: var(--card-bg);
+    padding: var(--standard-padding);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.file-upload-area {
+    border: 2px dashed var(--border-color);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: border-color var(--transition-speed);
+}
+
+.file-upload-area:hover {
+    border-color: var(--accent-color);
+}
+
+.file-upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #999;
+}
+
+.file-upload-text {
+    color: #999;
+}
+
+/* Modal styles */
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+    border-top-color: var(--border-color);
+}
+
+.close {
+    color: var(--text-color);
+}
+
+/* Tab styling */
+.nav-tabs {
+    border-bottom-color: var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-color);
+    border: none;
+    padding: 10px 15px;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent-color);
+    background-color: transparent;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.tab-content {
+    padding: var(--standard-padding) 0;
+}

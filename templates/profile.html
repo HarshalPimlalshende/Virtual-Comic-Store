@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ user.username }}'s Profile - ComicFlix{% endblock %}
+
+{% block content %}
+<div class="profile-header shadow-sm rounded-sm">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1>{{ user.username }}'s Profile</h1>
+            <p>Member since {{ user.created_at.strftime('%B %d, %Y') }}</p>
+            
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-value">{{ comics|length }}</span>
+                    <span class="profile-stat-label">Uploads</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-value">{{ user.library|length }}</span>
+                    <span class="profile-stat-label">Library</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-value">
+                        {% set total_views = 0 %}
+                        {% for comic in comics %}
+                            {% set total_views = total_views + comic.views %}
+                        {% endfor %}
+                        {{ total_views }}
+                    </span>
+                    <span class="profile-stat-label">Total Views</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('upload_comic') }}" class="btn btn-primary">
+                <i class="fas fa-upload me-2"></i> Upload Comic
+            </a>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs" id="profileTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="uploads-tab" data-bs-toggle="tab" data-bs-target="#uploads" type="button" role="tab">
+            My Uploads
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="library-tab" data-bs-toggle="tab" data-bs-target="#library" type="button" role="tab">
+            My Library
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="profileTabsContent">
+    <!-- My Uploads Tab -->
+    <div class="tab-pane fade show active" id="uploads" role="tabpanel">
+        {% if comics|length > 0 %}
+        <div class="comics-grid">
+            {% for comic in comics %}
+            <div class="comic-card">
+                <a href="{{ url_for('comic_details', comic_id=comic.id) }}">
+                    <div class="card">
+                        <div class="card-img-container bg-secondary d-flex align-items-center justify-content-center">
+                            <!-- Placeholder for comic cover -->
+                            <i class="fas fa-book fa-5x text-light"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ comic.title }}</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="comic-rating">
+                                    {% set rating = comic.get_average_rating()|round(1) %}
+                                    <span>{{ rating }}</span>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="text-muted">
+                                    <i class="fas fa-eye me-1"></i>{{ comic.views }}
+                                </span>
+                            </div>
+                            <small class="text-muted">Uploaded: {{ comic.upload_date.strftime('%d %b %Y') }}</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center my-5">
+            <div class="empty-state">
+                <i class="fas fa-upload fa-4x mb-3 text-secondary"></i>
+                <h3>No uploads yet</h3>
+                <p>Share your favorite comics with the community!</p>
+                <a href="{{ url_for('upload_comic') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-upload me-2"></i> Upload Comic
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- My Library Tab -->
+    <div class="tab-pane fade" id="library" role="tabpanel">
+        {% if user.library|length > 0 %}
+        <div class="comics-grid">
+            {% for comic_id in user.library %}
+                {% set comic = Comic.get_by_id(comic_id) %}
+                {% if comic %}
+                <div class="comic-card">
+                    <a href="{{ url_for('comic_details', comic_id=comic.id) }}">
+                        <div class="card">
+                            <div class="card-img-container bg-secondary d-flex align-items-center justify-content-center">
+                                <!-- Placeholder for comic cover -->
+                                <i class="fas fa-book fa-5x text-light"></i>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ comic.title }}</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="comic-rating">
+                                        {% set rating = comic.get_average_rating()|round(1) %}
+                                        <span>{{ rating }}</span>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <a href="{{ url_for('remove_from_library', comic_id=comic.id) }}" class="text-danger" title="Remove from library">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center my-5">
+            <div class="empty-state">
+                <i class="fas fa-books fa-4x mb-3 text-secondary"></i>
+                <h3>Your library is empty</h3>
+                <p>Add comics to your library to track what you're reading!</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-search me-2"></i> Browse Comics
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

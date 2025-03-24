@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}Upload Comic - ComicFlix{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card bg-card shadow">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Upload Comic</h2>
+                
+                <form method="post" action="{{ url_for('upload_comic') }}" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="title" class="form-label">Comic Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Comic File (PDF only)</label>
+                        <div class="file-upload-area" id="drop-area">
+                            <input type="file" class="d-none" id="comic_file" name="comic_file" accept=".pdf" required>
+                            <div class="text-center">
+                                <i class="fas fa-file-upload file-upload-icon"></i>
+                                <p class="file-upload-text">Drag & drop your PDF file here or click to browse</p>
+                                <button type="button" class="btn btn-outline-light mt-2" onclick="document.getElementById('comic_file').click()">
+                                    Select File
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">Maximum file size: 16MB</small>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i> Upload Comic
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% block title %}Reading: {{ comic.title }} - ComicFlix{% endblock %}
+
+{% block additional_head %}
+<!-- PDF.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+<script>
+    // Set PDF.js worker path
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
+</script>
+<style>
+    body, html {
+        overflow: hidden;
+    }
+    .viewer-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #000;
+        z-index: 9999;
+    }
+    .viewer-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(20, 20, 20, 0.9);
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10000;
+    }
+    .viewer-content {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: auto;
+    }
+    #pdf-viewer {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100%;
+    }
+    #pdf-viewer canvas {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    .nav-controls {
+        display: flex;
+        align-items: center;
+    }
+    .page-info {
+        margin: 0 15px;
+    }
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: none;
+        transition: background 0.3s;
+    }
+    .btn-icon:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .btn-icon:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="viewer-container">
+    <div class="viewer-header">
+        <div class="viewer-title">
+            <h5 class="m-0">{{ comic.title }}</h5>
+        </div>
+        <div class="nav-controls">
+            <button id="prev-page" class="btn-icon">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="page-info">
+                <span id="page-num">-</span> / <span id="page-count">-</span>
+            </div>
+            <button id="next-page" class="btn-icon">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button id="zoom-out" class="btn-icon ms-3">
+                <i class="fas fa-search-minus"></i>
+            </button>
+            <button id="zoom-in" class="btn-icon ms-2">
+                <i class="fas fa-search-plus"></i>
+            </button>
+            <a href="{{ url_for('comic_details', comic_id=comic.id) }}" class="btn-icon ms-3">
+                <i class="fas fa-times"></i>
+            </a>
+        </div>
+    </div>
+    <div class="viewer-content">
+        <div id="pdf-viewer" data-pdf-url="{{ url_for('uploaded_file', filename=comic.filename) }}"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script src="{{ url_for('static', filename='js/comic_viewer.js') }}"></script>
+{% endblock %}
