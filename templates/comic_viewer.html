@@ -50,7 +50,6 @@
         overflow: hidden;
         transition: all 0.3s ease;
         perspective: 1200px;
-        background-color: #0a1929; /* Match the dark background color */
     }
     #pdf-viewer {
         display: flex;
@@ -59,7 +58,6 @@
         min-height: 100%;
         position: relative;
         transition: transform 0.5s;
-        background-color: #0a1929; /* Match the dark background color */
     }
     .book-container {
         display: flex;
@@ -67,23 +65,18 @@
         perspective: 2000px;
         max-height: 100%;
         transform-style: preserve-3d;
-        background-color: #0a1929; /* Match dark background */
-        width: 100%;
     }
     .page-spread {
         display: flex;
         transform-style: preserve-3d;
-        transition: transform 0.5s ease, opacity 0.2s ease-in;
+        transition: transform 0.5s ease;
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        background: #f0f0f0; /* Light gray background to prevent white flash */
+        background: #fff;
         border-radius: 3px;
-        overflow: hidden; /* Prevent content from spilling out during animations */
     }
     .page-canvas {
         max-height: calc(100vh - 80px);
         box-shadow: inset -5px 0 10px rgba(0,0,0,0.1);
-        background-color: #f0f0f0; /* Light gray background while loading */
-        transition: opacity 0.2s ease-in;
     }
     .page-canvas:last-child {
         box-shadow: inset 5px 0 10px rgba(0,0,0,0.1);
