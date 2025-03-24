@@ -5,6 +5,8 @@
 {% block additional_head %}
 <!-- PDF.js library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+<!-- Hammer.js for touch gestures -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script>
     // Set PDF.js worker path
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
@@ -19,7 +21,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: #000;
+        background: #141414; /* Netflix dark background */
         z-index: 9999;
     }
     .viewer-header {
@@ -33,6 +35,11 @@
         justify-content: space-between;
         align-items: center;
         z-index: 10000;
+        transition: opacity 0.3s;
+    }
+    .viewer-header.hide {
+        opacity: 0;
+        pointer-events: none;
     }
     .viewer-content {
         position: absolute;
@@ -40,17 +47,56 @@
         left: 0;
         right: 0;
         bottom: 0;
-        overflow: auto;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        perspective: 1200px;
     }
     #pdf-viewer {
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         min-height: 100%;
+        position: relative;
+        transition: transform 0.5s;
     }
-    #pdf-viewer canvas {
+    .book-container {
+        display: flex;
+        justify-content: center;
+        perspective: 2000px;
+        max-height: 100%;
+        transform-style: preserve-3d;
+    }
+    .page-spread {
+        display: flex;
+        transform-style: preserve-3d;
+        transition: transform 0.5s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        background: #fff;
+        border-radius: 3px;
+    }
+    .page-canvas {
+        max-height: calc(100vh - 80px);
+        box-shadow: inset -5px 0 10px rgba(0,0,0,0.1);
+    }
+    .page-canvas:last-child {
+        box-shadow: inset 5px 0 10px rgba(0,0,0,0.1);
+    }
+    .single-page-mode .page-canvas {
         max-width: 100%;
-        margin: 0 auto;
+    }
+    .page-turn-overlay {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 20%;
+        z-index: 100;
+        cursor: pointer;
+    }
+    .page-turn-left {
+        left: 0;
+    }
+    .page-turn-right {
+        right: 0;
     }
     .nav-controls {
         display: flex;
@@ -58,6 +104,7 @@
     }
     .page-info {
         margin: 0 15px;
+        color: #fff;
     }
     .btn-icon {
         width: 40px;
@@ -70,6 +117,7 @@
         color: white;
         border: none;
         transition: background 0.3s;
+        cursor: pointer;
     }
     .btn-icon:hover {
         background: rgba(255, 255, 255, 0.2);
@@ -77,6 +125,45 @@
     .btn-icon:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+    .view-mode-toggle {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin-left: 10px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .view-mode-toggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .page-flip-animation {
+        animation: pageFlip 0.5s ease-in-out;
+    }
+    
+    @keyframes pageFlip {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(180deg); }
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .page-spread {
+            flex-direction: column;
+        }
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+        }
+        .viewer-header {
+            padding: 8px 15px;
+        }
+        .page-info {
+            margin: 0 8px;
+            font-size: 14px;
+        }
     }
 </style>
 {% endblock %}
@@ -103,13 +190,20 @@
             <button id="zoom-in" class="btn-icon ms-2">
                 <i class="fas fa-search-plus"></i>
             </button>
+            <button id="toggle-view-mode" class="view-mode-toggle ms-3">
+                <i class="fas fa-book-open"></i>
+                <span id="view-mode-text">Single Page</span>
+            </button>
             <a href="{{ url_for('comic_details', comic_id=comic.id) }}" class="btn-icon ms-3">
                 <i class="fas fa-times"></i>
             </a>
         </div>
     </div>
     <div class="viewer-content">
-        <div id="pdf-viewer" data-pdf-url="{{ url_for('uploaded_file', filename=comic.filename) }}"></div>
+        <div id="pdf-viewer" data-pdf-url="{{ url_for('uploaded_file', filename=comic.filename) }}">
+            <div class="page-turn-overlay page-turn-left"></div>
+            <div class="page-turn-overlay page-turn-right"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
