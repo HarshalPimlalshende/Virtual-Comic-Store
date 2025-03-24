@@ -1,19 +1,19 @@
-/* Netflix-inspired Dark Theme for Comic Reading Platform */
+/* Dark Blue Cartoonish Theme for Comic Reading Platform */
 
 /* Global Variables */
 :root {
-    --primary-bg: #141414;       /* Netflix black */
+    --primary-bg: #0A1929;       /* Dark blue background */
     --secondary-bg: #1F4068;     /* Medium dark blue */
-    --accent-color: #E50914;     /* Netflix red */
+    --accent-color: #1E90FF;     /* Bright blue accent */
     --text-color: #FFFFFF;       /* White */
-    --card-bg: #181818;          /* Dark grey */
-    --hover-bg: #232323;         /* Slightly lighter grey for hover states */
-    --border-color: #333333;     /* Border color */
+    --card-bg: #162B3C;          /* Slightly lighter dark blue */
+    --hover-bg: #1D3649;         /* Hover state blue */
+    --border-color: #2C4356;     /* Border color */
     --success-color: #46B04A;    /* Green for success messages */
     --warning-color: #E6A23C;    /* Yellow for warnings */
     --danger-color: #F56C6C;     /* Red for errors */
     --info-color: #909399;       /* Grey for info messages */
-    --font-main: 'Roboto', 'Netflix Sans', sans-serif;
+    --font-main: 'Roboto', 'Arial', sans-serif;
     --standard-padding: 16px;    /* Standard padding */
     --transition-speed: 0.3s;    /* Transition speed for effects */
 }

@@ -198,32 +198,50 @@ document.addEventListener('DOMContentLoaded', function() {
         
         pageFlipping = true;
         
-        // Add page flip animation
-        const pageSpread = document.querySelector('.page-spread');
-        if (pageSpread) {
-            pageSpread.style.transformOrigin = 'right center';
-            pageSpread.style.transform = 'rotateY(-15deg)';
+        // Keep the current page spread visible during transition
+        // We create a clone of the current spread for animation
+        const currentSpread = document.querySelector('.page-spread');
+        if (currentSpread) {
+            const clonedSpread = currentSpread.cloneNode(true);
+            clonedSpread.style.position = 'absolute';
+            clonedSpread.style.top = currentSpread.offsetTop + 'px';
+            clonedSpread.style.left = currentSpread.offsetLeft + 'px';
+            clonedSpread.style.transformOrigin = 'right center';
+            clonedSpread.style.zIndex = '200';
+            bookContainer.appendChild(clonedSpread);
             
-            setTimeout(() => {
-                // In double page mode, go back 2 pages
-                if (isDoublePage && !isMobile) {
-                    pageNum = Math.max(1, pageNum - 2);
-                } else {
-                    pageNum--;
-                }
-                
-                renderCurrentPages();
-                pageSpread.style.transform = '';
-                pageFlipping = false;
-            }, 200);
-        } else {
-            // Fallback if no animation
+            // Animate the cloned spread
+            clonedSpread.style.transition = 'transform 0.2s ease-in-out';
+            clonedSpread.style.transform = 'rotateY(-15deg)';
+            
+            // Prepare the new page and render it behind
             if (isDoublePage && !isMobile) {
                 pageNum = Math.max(1, pageNum - 2);
             } else {
                 pageNum--;
             }
             
+            // Render the new page in the background
+            const pageState = { num: pageNum, isDouble: isDoublePage };
+            setTimeout(() => {
+                // Only update DOM after animation starts
+                renderCurrentPages();
+                
+                // Remove the clone after animation completes
+                setTimeout(() => {
+                    if (clonedSpread.parentNode) {
+                        clonedSpread.parentNode.removeChild(clonedSpread);
+                    }
+                    pageFlipping = false;
+                }, 200);
+            }, 50);
+        } else {
+            // Fallback if no animation possible
+            if (isDoublePage && !isMobile) {
+                pageNum = Math.max(1, pageNum - 2);
+            } else {
+                pageNum--;
+            }
             renderCurrentPages();
             pageFlipping = false;
         }
@@ -239,32 +257,49 @@ document.addEventListener('DOMContentLoaded', function() {
         
         pageFlipping = true;
         
-        // Add page flip animation
-        const pageSpread = document.querySelector('.page-spread');
-        if (pageSpread) {
-            pageSpread.style.transformOrigin = 'left center';
-            pageSpread.style.transform = 'rotateY(15deg)';
+        // Keep the current page spread visible during transition
+        // We create a clone of the current spread for animation
+        const currentSpread = document.querySelector('.page-spread');
+        if (currentSpread) {
+            const clonedSpread = currentSpread.cloneNode(true);
+            clonedSpread.style.position = 'absolute';
+            clonedSpread.style.top = currentSpread.offsetTop + 'px';
+            clonedSpread.style.left = currentSpread.offsetLeft + 'px';
+            clonedSpread.style.transformOrigin = 'left center';
+            clonedSpread.style.zIndex = '200';
+            bookContainer.appendChild(clonedSpread);
             
-            setTimeout(() => {
-                // In double page mode, go forward 2 pages
-                if (isDoublePage && !isMobile) {
-                    pageNum = Math.min(pdfDoc.numPages, pageNum + 2);
-                } else {
-                    pageNum++;
-                }
-                
-                renderCurrentPages();
-                pageSpread.style.transform = '';
-                pageFlipping = false;
-            }, 200);
-        } else {
-            // Fallback if no animation
+            // Animate the cloned spread
+            clonedSpread.style.transition = 'transform 0.2s ease-in-out';
+            clonedSpread.style.transform = 'rotateY(15deg)';
+            
+            // Prepare the new page and render it behind
             if (isDoublePage && !isMobile) {
                 pageNum = Math.min(pdfDoc.numPages, pageNum + 2);
             } else {
                 pageNum++;
             }
             
+            // Render the new page in the background
+            setTimeout(() => {
+                // Only update DOM after animation starts
+                renderCurrentPages();
+                
+                // Remove the clone after animation completes
+                setTimeout(() => {
+                    if (clonedSpread.parentNode) {
+                        clonedSpread.parentNode.removeChild(clonedSpread);
+                    }
+                    pageFlipping = false;
+                }, 200);
+            }, 50);
+        } else {
+            // Fallback if no animation possible
+            if (isDoublePage && !isMobile) {
+                pageNum = Math.min(pdfDoc.numPages, pageNum + 2);
+            } else {
+                pageNum++;
+            }
             renderCurrentPages();
             pageFlipping = false;
         }
