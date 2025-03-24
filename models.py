@@ -97,6 +97,7 @@ class Comic(db.Model):
     def increment_views(self):
         self.views += 1
         db.session.commit()
+        return self.views
     
     @property
     def ratings(self):

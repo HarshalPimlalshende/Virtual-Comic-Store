@@ -36,7 +36,7 @@ def login():
         password = request.form.get('password')
         remember = 'remember' in request.form
         
-        user = User.get_by_username(username)
+        user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password):
             login_user(user, remember=remember)
@@ -60,11 +60,11 @@ def register():
         confirm_password = request.form.get('confirm_password')
         
         # Validate inputs
-        if User.get_by_username(username):
+        if User.query.filter_by(username=username).first():
             flash('Username already exists', 'danger')
             return render_template('register.html')
         
-        if User.get_by_email(email):
+        if User.query.filter_by(email=email).first():
             flash('Email already in use', 'danger')
             return render_template('register.html')
         
@@ -73,7 +73,8 @@ def register():
             return render_template('register.html')
         
         user = User(username=username, email=email, password=password)
-        user.save()
+        db.session.add(user)
+        db.session.commit()
         
         flash('Account created successfully! You can now log in.', 'success')
         return redirect(url_for('login'))
@@ -125,7 +126,8 @@ def upload_comic():
                     filename=unique_filename,
                     owner_id=current_user.id
                 )
-                comic.save()
+                db.session.add(comic)
+                db.session.commit()
                 
                 flash('Comic uploaded successfully!', 'success')
                 return redirect(url_for('comic_details', comic_id=comic.id))
@@ -177,7 +179,7 @@ def uploaded_file(filename):
 @app.route('/comic/<comic_id>/add_to_library')
 @login_required
 def add_to_library(comic_id):
-    comic = Comic.get_by_id(comic_id)
+    comic = Comic.query.get(comic_id)
     if not comic:
         flash('Comic not found', 'danger')
         return redirect(url_for('index'))
@@ -202,7 +204,7 @@ def remove_from_library(comic_id):
 @app.route('/comic/<comic_id>/review', methods=['POST'])
 @login_required
 def add_review(comic_id):
-    comic = Comic.get_by_id(comic_id)
+    comic = Comic.query.get(comic_id)
     if not comic:
         flash('Comic not found', 'danger')
         return redirect(url_for('index'))
@@ -215,15 +217,26 @@ def add_review(comic_id):
         flash('Rating must be between 1 and 5', 'danger')
         return redirect(url_for('comic_details', comic_id=comic_id))
     
-    review = Review(
-        user_id=current_user.id,
-        comic_id=comic_id,
-        text=text,
-        rating=rating
-    )
-    review.save()
+    # Check if user already reviewed this comic
+    existing_review = Review.query.filter_by(user_id=current_user.id, comic_id=comic_id).first()
+    if existing_review:
+        # Update existing review
+        existing_review.text = text
+        existing_review.rating = rating
+        db.session.commit()
+        flash('Review updated successfully', 'success')
+    else:
+        # Create new review
+        review = Review(
+            user_id=current_user.id,
+            comic_id=comic_id,
+            text=text,
+            rating=rating
+        )
+        db.session.add(review)
+        db.session.commit()
+        flash('Review added successfully', 'success')
     
-    flash('Review added successfully', 'success')
     return redirect(url_for('comic_details', comic_id=comic_id))
 
 @app.route('/search')
@@ -236,8 +249,8 @@ def search():
         search_term = f"%{query}%"
         results = Comic.query.filter(
             db.or_(
-                db.func.lower(Comic.title).like(search_term),
-                db.func.lower(Comic.description).like(search_term)
+                Comic.title.ilike(search_term),
+                Comic.description.ilike(search_term)
             )
         ).all()
     
