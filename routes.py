@@ -6,17 +6,10 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
 from models import User, Comic, Review
-from serverless_wsgi import handle_request
 
-app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return "Hello from Flask on Vercel!"
 
-# Vercel requires this handler
-def handler(req, res):
-    return handle_request(app, req, res)
+
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
