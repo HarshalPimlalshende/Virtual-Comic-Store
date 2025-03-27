@@ -6,6 +6,17 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
 from models import User, Comic, Review
+from serverless_wsgi import handle_request
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hello from Flask on Vercel!"
+
+# Vercel requires this handler
+def handler(req, res):
+    return handle_request(app, req, res)
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -92,7 +103,7 @@ def logout():
 @login_required
 def profile():
     user_comics = Comic.query.filter_by(owner_id=current_user.id).all()
-    return render_template('profile.html', user=current_user, comics=user_comics)
+    return render_template('profile.html', user=current_user, comics=user_comics,Comic = Comic)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required

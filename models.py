@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from app import db
 import json
 
-# Association table for User-Comic library relationship (many-to-many)
+
 user_library = db.Table('user_library',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('comic_id', db.Integer, db.ForeignKey('comic.id'), primary_key=True)

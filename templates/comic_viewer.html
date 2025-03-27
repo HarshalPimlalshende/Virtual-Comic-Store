@@ -12,24 +12,31 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
 </script>
 <style>
-    body, html {
-        overflow: hidden;
-    }
+    /* Improved viewer styles */
     .viewer-container {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--primary-bg); /* Dark blue background */
+        background: #333;
         z-index: 9999;
+        overflow: hidden;
+        /* Add background image with light opacity */
+        background-image: url('{{ url_for("static", filename="images/bg1.jpg") }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        /* Dark overlay to ensure content remains readable */
+        box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.70);
     }
     .viewer-header {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        background: rgba(10, 25, 41, 0.9); /* Dark blue with transparency */
+        background: rgba(10, 25, 41, 0.9);
         padding: 10px 20px;
         display: flex;
         justify-content: space-between;
@@ -47,56 +54,33 @@
         left: 0;
         right: 0;
         bottom: 0;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        perspective: 1200px;
-    }
-    #pdf-viewer {
+        overflow: auto;
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100%;
+    }
+    #pdf-viewer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 20px 0;
+    }
+    .page-container {
         position: relative;
-        transition: transform 0.5s;
-    }
-    .book-container {
-        display: flex;
-        justify-content: center;
-        perspective: 2000px;
-        max-height: 100%;
-        transform-style: preserve-3d;
-    }
-    .page-spread {
-        display: flex;
-        transform-style: preserve-3d;
-        transition: transform 0.5s ease;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        margin: 10px 0;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         background: #fff;
-        border-radius: 3px;
     }
     .page-canvas {
-        max-height: calc(100vh - 80px);
-        box-shadow: inset -5px 0 10px rgba(0,0,0,0.1);
-    }
-    .page-canvas:last-child {
-        box-shadow: inset 5px 0 10px rgba(0,0,0,0.1);
-    }
-    .single-page-mode .page-canvas {
+        display: block;
         max-width: 100%;
+        max-height: calc(100vh - 100px);
     }
-    .page-turn-overlay {
-        position: absolute;
-        top: 0;
-        height: 100%;
-        width: 20%;
-        z-index: 100;
-        cursor: pointer;
-    }
-    .page-turn-left {
-        left: 0;
-    }
-    .page-turn-right {
-        right: 0;
+    .loading-indicator {
+        color: white;
+        font-size: 1.2rem;
+        margin-top: 20px;
     }
     .nav-controls {
         display: flex;
@@ -105,6 +89,8 @@
     .page-info {
         margin: 0 15px;
         color: #fff;
+        min-width: 80px;
+        text-align: center;
     }
     .btn-icon {
         width: 40px;
@@ -113,7 +99,7 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background: rgba(30, 144, 255, 0.15);  /* Bright blue with transparency */
+        background: rgba(30, 144, 255, 0.15);
         color: white;
         border: none;
         transition: all 0.3s;
@@ -125,58 +111,51 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
-    .btn-icon:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
-    }
     .btn-icon:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     .view-mode-toggle {
         background: rgba(30, 144, 255, 0.2);
         color: white;
         border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
+        padding: 8px 12px;
+        border-radius: 20px;
         margin-left: 10px;
         cursor: pointer;
         transition: all 0.3s;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
     .view-mode-toggle:hover {
         background: rgba(30, 144, 255, 0.4);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-    .view-mode-toggle:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
-    }
-    .page-flip-animation {
-        animation: pageFlip 0.5s ease-in-out;
-    }
-    
-    @keyframes pageFlip {
-        0% { transform: rotateY(0deg); }
-        100% { transform: rotateY(180deg); }
     }
     
     /* Mobile optimizations */
     @media (max-width: 768px) {
-        .page-spread {
-            flex-direction: column;
+        .viewer-header {
+            padding: 8px 10px;
         }
         .btn-icon {
             width: 36px;
             height: 36px;
-        }
-        .viewer-header {
-            padding: 8px 15px;
+            font-size: 0.9rem;
         }
         .page-info {
             margin: 0 8px;
             font-size: 14px;
+            min-width: 60px;
+        }
+        .view-mode-toggle {
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        .view-mode-toggle span {
+            display: none;
         }
     }
 </style>
@@ -189,39 +168,297 @@
             <h5 class="m-0">{{ comic.title }}</h5>
         </div>
         <div class="nav-controls">
-            <button id="prev-page" class="btn-icon">
+            <button id="prev-page" class="btn-icon" disabled>
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="page-info">
                 <span id="page-num">-</span> / <span id="page-count">-</span>
             </div>
-            <button id="next-page" class="btn-icon">
+            <button id="next-page" class="btn-icon" disabled>
                 <i class="fas fa-chevron-right"></i>
             </button>
-            <button id="zoom-out" class="btn-icon ms-3">
+            <button id="zoom-out" class="btn-icon ms-2">
                 <i class="fas fa-search-minus"></i>
             </button>
             <button id="zoom-in" class="btn-icon ms-2">
                 <i class="fas fa-search-plus"></i>
             </button>
-            <button id="toggle-view-mode" class="view-mode-toggle ms-3">
+            <button id="toggle-view-mode" class="view-mode-toggle ms-2">
                 <i class="fas fa-book-open"></i>
                 <span id="view-mode-text">Single Page</span>
             </button>
-            <a href="{{ url_for('comic_details', comic_id=comic.id) }}" class="btn-icon ms-3">
+            <a href="{{ url_for('comic_details', comic_id=comic.id) }}" class="btn-icon ms-2">
                 <i class="fas fa-times"></i>
             </a>
         </div>
     </div>
     <div class="viewer-content">
-        <div id="pdf-viewer" data-pdf-url="{{ url_for('uploaded_file', filename=comic.filename) }}">
-            <div class="page-turn-overlay page-turn-left"></div>
-            <div class="page-turn-overlay page-turn-right"></div>
-        </div>
+        <div id="pdf-viewer" data-pdf-url="{{ url_for('uploaded_file', filename=comic.filename) }}"></div>
     </div>
 </div>
 {% endblock %}
 
 {% block additional_scripts %}
-<script src="{{ url_for('static', filename='js/comic_viewer.js') }}"></script>
+<script>
+    // Main viewer variables
+    let pdfDoc = null;
+    let currentPage = 1;
+    let scale = 1.0;
+    let isRendering = false;
+    let pageNumPending = null;
+    let viewMode = 'single'; // 'single' or 'spread'
+    
+    // DOM elements
+    const viewer = document.getElementById('pdf-viewer');
+    const pdfUrl = viewer.getAttribute('data-pdf-url');
+    const pageNumEl = document.getElementById('page-num');
+    const pageCountEl = document.getElementById('page-count');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
+    const toggleViewBtn = document.getElementById('toggle-view-mode');
+    const viewModeText = document.getElementById('view-mode-text');
+    
+    // Initialize PDF.js
+    function initPdfViewer() {
+        // Show loading state
+        viewer.innerHTML = '<div class="loading-indicator">Loading comic...</div>';
+        
+        // Load the PDF
+        pdfjsLib.getDocument({
+            url: pdfUrl,
+            cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/cmaps/',
+            cMapPacked: true
+        }).promise.then(function(pdf) {
+            pdfDoc = pdf;
+            pageCountEl.textContent = pdf.numPages;
+            
+            // Enable buttons
+            prevBtn.disabled = true;
+            nextBtn.disabled = pdf.numPages <= 1;
+            
+            // Render first page
+            renderPage(1);
+            
+            // Set up touch gestures
+            setupTouchGestures();
+        }).catch(function(error) {
+            console.error('PDF loading error:', error);
+            viewer.innerHTML = '<div class="loading-indicator">Error loading comic. Please try again.</div>';
+        });
+    }
+    
+    // Render a page
+    function renderPage(num) {
+        if (isRendering) {
+            pageNumPending = num;
+            return;
+        }
+        
+        isRendering = true;
+        currentPage = num;
+        pageNumEl.textContent = num;
+        
+        // Update button states
+        prevBtn.disabled = num <= 1;
+        nextBtn.disabled = num >= pdfDoc.numPages;
+        
+        // Clear previous pages
+        viewer.innerHTML = '';
+        
+        // For single page view
+        if (viewMode === 'single') {
+            renderSinglePage(num);
+        } 
+        // For spread view
+        else {
+            // If even page number, show current and next page
+            if (num % 2 === 0 && num < pdfDoc.numPages) {
+                renderPageSpread(num, num + 1);
+            } 
+            // If odd page number, show previous and current page
+            else if (num > 1) {
+                renderPageSpread(num - 1, num);
+            } 
+            // First page only
+            else {
+                renderSinglePage(num);
+            }
+        }
+    }
+    
+    // Render a single page
+    function renderSinglePage(num) {
+        pdfDoc.getPage(num).then(function(page) {
+            const viewport = page.getViewport({ scale: scale });
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.createElement('div');
+            
+            container.className = 'page-container';
+            canvas.className = 'page-canvas';
+            
+            // Set canvas dimensions
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            
+            // Render PDF page into canvas context
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            
+            page.render(renderContext).promise.then(function() {
+                container.appendChild(canvas);
+                viewer.appendChild(container);
+                
+                isRendering = false;
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+    }
+    
+    // Render two pages as a spread
+    function renderPageSpread(leftNum, rightNum) {
+        const spreadContainer = document.createElement('div');
+        spreadContainer.className = 'page-spread-container';
+        spreadContainer.style.display = 'flex';
+        spreadContainer.style.justifyContent = 'center';
+        spreadContainer.style.gap = '10px';
+        
+        viewer.appendChild(spreadContainer);
+        
+        // Render left page
+        pdfDoc.getPage(leftNum).then(function(leftPage) {
+            const leftViewport = leftPage.getViewport({ scale: scale });
+            const leftCanvas = document.createElement('canvas');
+            const leftCtx = leftCanvas.getContext('2d');
+            const leftContainer = document.createElement('div');
+            
+            leftContainer.className = 'page-container';
+            leftCanvas.className = 'page-canvas';
+            
+            leftCanvas.height = leftViewport.height;
+            leftCanvas.width = leftViewport.width;
+            
+            leftPage.render({
+                canvasContext: leftCtx,
+                viewport: leftViewport
+            }).promise.then(function() {
+                leftContainer.appendChild(leftCanvas);
+                spreadContainer.appendChild(leftContainer);
+                
+                // Render right page
+                return pdfDoc.getPage(rightNum);
+            }).then(function(rightPage) {
+                const rightViewport = rightPage.getViewport({ scale: scale });
+                const rightCanvas = document.createElement('canvas');
+                const rightCtx = rightCanvas.getContext('2d');
+                const rightContainer = document.createElement('div');
+                
+                rightContainer.className = 'page-container';
+                rightCanvas.className = 'page-canvas';
+                
+                rightCanvas.height = rightViewport.height;
+                rightCanvas.width = rightViewport.width;
+                
+                return rightPage.render({
+                    canvasContext: rightCtx,
+                    viewport: rightViewport
+                }).promise.then(function() {
+                    rightContainer.appendChild(rightCanvas);
+                    spreadContainer.appendChild(rightContainer);
+                    
+                    isRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+        });
+    }
+    
+    // Zoom functions
+    function zoomIn() {
+        if (scale >= 3.0) return;
+        scale += 0.1;
+        renderPage(currentPage);
+    }
+    
+    function zoomOut() {
+        if (scale <= 0.5) return;
+        scale -= 0.1;
+        renderPage(currentPage);
+    }
+    
+    // Toggle view mode between single and spread
+    function toggleViewMode() {
+        viewMode = viewMode === 'single' ? 'spread' : 'single';
+        viewModeText.textContent = viewMode === 'single' ? 'Single Page' : 'Page Spread';
+        renderPage(currentPage);
+    }
+    
+    // Set up touch gestures
+    function setupTouchGestures() {
+        const hammer = new Hammer(viewer);
+        
+        hammer.on('swipeleft', function() {
+            if (currentPage < pdfDoc.numPages) {
+                nextPage();
+            }
+        });
+        
+        hammer.on('swiperight', function() {
+            if (currentPage > 1) {
+                prevPage();
+            }
+        });
+    }
+    
+    // Navigation functions
+    function nextPage() {
+        if (currentPage >= pdfDoc.numPages) return;
+        currentPage++;
+        renderPage(currentPage);
+    }
+    
+    function prevPage() {
+        if (currentPage <= 1) return;
+        currentPage--;
+        renderPage(currentPage);
+    }
+    
+    // Event listeners
+    prevBtn.addEventListener('click', prevPage);
+    nextBtn.addEventListener('click', nextPage);
+    zoomInBtn.addEventListener('click', zoomIn);
+    zoomOutBtn.addEventListener('click', zoomOut);
+    toggleViewBtn.addEventListener('click', toggleViewMode);
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        switch(e.key) {
+            case 'ArrowLeft':
+                prevPage();
+                break;
+            case 'ArrowRight':
+                nextPage();
+                break;
+            case '+':
+                zoomIn();
+                break;
+            case '-':
+                zoomOut();
+                break;
+        }
+    });
+    
+    // Initialize the viewer when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initPdfViewer);
+</script>
 {% endblock %}
