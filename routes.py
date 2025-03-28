@@ -270,3 +270,30 @@ def search():
         ).all()
     
     return render_template('index.html', comics=results, search_query=query)
+
+#delete route
+@app.route('/delete_comic/<int:comic_id>', methods=['POST'])
+@login_required
+def delete_comic(comic_id):
+    comic = Comic.query.get(comic_id)
+
+    if not comic:
+        flash("Comic not found!", "danger")
+        return redirect(url_for("dashboard"))
+
+    if comic.user_id != current_user.id:
+        flash("Unauthorized action!", "danger")
+        return redirect(url_for("dashboard"))
+
+    # Delete file from storage (if stored in a folder)
+    import os
+    comic_path = os.path.join("uploads/comics", comic.filename)
+    if os.path.exists(comic_path):
+        os.remove(comic_path)
+
+    # Remove from database
+    db.session.delete(comic)
+    db.session.commit()
+
+    flash("Comic deleted successfully!", "success")
+    return redirect(url_for("dashboard"))
