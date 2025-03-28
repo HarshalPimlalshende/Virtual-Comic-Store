@@ -176,7 +176,7 @@ def comic_details(comic_id):
     # Increment view count
     comic.increment_views()
     
-    return render_template('comic_details.html', comic=comic, reviews=reviews, owner=owner)
+    return render_template('comic_details.html', comic=comic, reviews=reviews, owner=owner,User = User)
 
 @app.route('/comic/<comic_id>/read')
 def read_comic(comic_id):
