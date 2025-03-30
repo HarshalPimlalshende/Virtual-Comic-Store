@@ -5,10 +5,16 @@ from app import db
 import json
 
 
+
 user_library = db.Table('user_library',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('comic_id', db.Integer, db.ForeignKey('comic.id'), primary_key=True)
 )
+
+
+
+
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,12 +22,19 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    # is_admin = db.Column(db.Boolean, default=False)
+
+    def get_id(self):
+        return str(self.id)
     
     # Relationships
     comics_uploaded = db.relationship('Comic', backref='owner', lazy='dynamic')
     reviews = db.relationship('Review', backref='user', lazy='dynamic')
     library_comics = db.relationship('Comic', secondary=user_library, 
                                     lazy='dynamic', backref=db.backref('in_libraries', lazy='dynamic'))
+    
+    def get_by_id(user_id):
+        return User.query.get(user_id)
     
     def __init__(self, username, email, password):
         self.username = username

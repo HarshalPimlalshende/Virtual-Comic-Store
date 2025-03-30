@@ -6,6 +6,8 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+from flask_admin.contrib.sqla import ModelView
+from flask_login import current_user
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)

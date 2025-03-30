@@ -20,7 +20,7 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
+app.config['MAX_CONTENT_LENGTH'] = 40 * 1024 * 1024  # 16MB max upload size
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -223,7 +223,9 @@ def add_review(comic_id):
     if not comic:
         flash('Comic not found', 'danger')
         return redirect(url_for('index'))
-    
+    # if existing_review:
+    #     flash("You have already reviewed this comic.", "warning")
+    #     return redirect(url_for('comic_details', comic_id=comic_id))
     text = request.form.get('review_text')
     rating = int(request.form.get('rating', 5))
     
@@ -271,7 +273,7 @@ def search():
     
     return render_template('index.html', comics=results, search_query=query)
 
-#delete route
+#delete file
 @app.route('/delete_comic/<int:comic_id>', methods=['POST'])
 @login_required
 def delete_comic(comic_id):
@@ -279,15 +281,14 @@ def delete_comic(comic_id):
 
     if not comic:
         flash("Comic not found!", "danger")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("profile"))
 
-    if comic.user_id != current_user.id:
+    if comic.owner_id != current_user.id:
         flash("Unauthorized action!", "danger")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("profile"))
 
-    # Delete file from storage (if stored in a folder)
-    import os
-    comic_path = os.path.join("uploads/comics", comic.filename)
+    # Delete file from storage
+    comic_path = os.path.join(app.config['UPLOAD_FOLDER'], comic.filename)
     if os.path.exists(comic_path):
         os.remove(comic_path)
 
@@ -296,4 +297,28 @@ def delete_comic(comic_id):
     db.session.commit()
 
     flash("Comic deleted successfully!", "success")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("profile"))
+
+
+#edit the entry 
+@app.route('/edit_comic/<int:comic_id>', methods=['GET', 'POST'])
+@login_required
+def edit_comic(comic_id):
+    comic = Comic.query.get(comic_id)
+
+    if not comic:
+        flash("Comic not found!", "danger")
+        return redirect(url_for("profile"))
+
+    if comic.owner_id != current_user.id:
+        flash("Unauthorized action!", "danger")
+        return redirect(url_for("profile"))
+
+    if request.method == 'POST':
+        comic.title = request.form.get('title')
+        comic.description = request.form.get('description')
+        db.session.commit()
+        flash("Comic updated successfully!", "success")
+        return redirect(url_for("comic_details", comic_id=comic.id))
+
+    return render_template('edit_comic.html', comic=comic)

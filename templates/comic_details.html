@@ -1,141 +1,154 @@
-{% extends "layout.html" %}
+    {% extends "layout.html" %}
 
-{% block title %}{{ comic.title }} - ComicFlix{% endblock %}
+    {% block title %}{{ comic.title }} - ComicFlix{% endblock %}
 
-{% block content %}
-<div class="comic-detail-container">
-    <div class="row">
-        <!-- Comic Cover and Actions -->
-        <div class="col-md-4 mb-4">
-            <div class="bg-card p-3 rounded shadow-sm text-center">
-                <div class="comic-cover-container bg-secondary mb-3 d-flex align-items-center justify-content-center" style="height: 350px;">
-                    <!-- Comic logo based on logo_id -->
-                    <img src="{{ url_for('static', filename='images/logo' + (comic.logo_id|string if comic.logo_id else '1') + '.svg') }}" 
-                         alt="{{ comic.title }}" class="comic-logo-large">
-                </div>
-                
-                <div class="d-grid gap-2 mt-3">
-                    <a href="{{ url_for('read_comic', comic_id=comic.id) }}" class="btn btn-primary">
-                        <i class="fas fa-book-open me-2"></i> Read Now
-                    </a>
+    {% block content %}
+    <div class="comic-detail-container">
+        <div class="row">
+            <!-- Comic Cover and Actions -->
+            <div class="col-md-4 mb-4">
+                <div class="bg-card p-3 rounded shadow-sm text-center">
+                    <div class="comic-cover-container bg-secondary mb-3 d-flex align-items-center justify-content-center" style="height: 350px;">
+                        <!-- Comic logo based on logo_id -->
+                        <img src="{{ url_for('static', filename='images/logo' + (comic.logo_id|string if comic.logo_id else '1') + '.svg') }}" 
+                            alt="{{ comic.title }}" class="comic-logo-large">
+                    </div>
                     
-                    {% if current_user.is_authenticated %}
-                        {% if comic.id in current_user.library %}
-                            <a href="{{ url_for('remove_from_library', comic_id=comic.id) }}" class="btn btn-outline-light">
-                                <i class="fas fa-minus me-2"></i> Remove from Library
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{{ url_for('read_comic', comic_id=comic.id) }}" class="btn btn-primary">
+                            <i class="fas fa-book-open me-2"></i> Read Now
+                        </a>
+                        
+                        {% if current_user.is_authenticated %}
+                            {% if comic.id in current_user.library %}
+                                <a href="{{ url_for('remove_from_library', comic_id=comic.id) }}" class="btn btn-outline-light">
+                                    <i class="fas fa-minus me-2"></i> Remove from Library
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('add_to_library', comic_id=comic.id) }}" class="btn btn-outline-light">
+                                    <i class="fas fa-plus me-2"></i> Add to Library
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('uploaded_file', filename=comic.filename) }}" class="btn btn-secondary" download>
+                                <i class="fas fa-download me-2"></i> Download
                             </a>
+                            {% if current_user.is_authenticated and current_user.id == comic.owner_id %}
+
+                            <a href="{{ url_for('edit_comic', comic_id=comic.id) }}" class="btn btn-warning">
+                                <i class="fas fa-edit me-2"></i> Edit Comic
+                            </a>
+    <form action="{{ url_for('delete_comic', comic_id=comic.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this comic?');">
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-2"></i> Delete Comic
+        </button>
+    </form>
+{% endif %}
+
                         {% else %}
-                            <a href="{{ url_for('add_to_library', comic_id=comic.id) }}" class="btn btn-outline-light">
-                                <i class="fas fa-plus me-2"></i> Add to Library
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-light">
+                                <i class="fas fa-sign-in-alt me-2"></i> Login to Add to Library
                             </a>
                         {% endif %}
-                        
-                        <a href="{{ url_for('uploaded_file', filename=comic.filename) }}" class="btn btn-secondary" download>
-                            <i class="fas fa-download me-2"></i> Download
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-outline-light">
-                            <i class="fas fa-sign-in-alt me-2"></i> Login to Add to Library
-                        </a>
-                    {% endif %}
-                                           
-                            
+                                            
+                                
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>  
-       
+            </div>  
         
-        <!-- Comic Details -->
-        <div class="col-md-8">
-            <h1 class="mb-2">{{ comic.title }}</h1>
             
-            <div class="comic-stats mb-3">
-                <span class="me-3">
-                    <i class="fas fa-star text-warning me-1"></i>
-                    {{ comic.get_average_rating()|round(1) }} ({{ comic.ratings|length }} reviews)
-                </span>
-                <span class="me-3">
-                    <i class="fas fa-eye me-1"></i>
-                    {{ comic.views }} views
-                </span>
-                <span>
-                    <i class="fas fa-calendar-alt me-1"></i>
-                    Uploaded on {{ comic.upload_date.strftime('%B %d, %Y') }}
-                </span>
-            </div>
-            
-            <div class="comic-author mb-4">
-                <p>Uploaded by: <strong>{{ owner.username }}</strong></p>
-            </div>
-            
-            <div class="comic-description mb-4">
-                <h4>Description</h4>
-                <p>{{ comic.description }}</p>
-            </div>
-            
-            <!-- Reviews Section -->
-            <div class="reviews-section">
-                <h4>Reviews</h4>
+            <!-- Comic Details -->
+            <div class="col-md-8">
+                <h1 class="mb-2">{{ comic.title }}</h1>
                 
-                {% if current_user.is_authenticated and current_user.id != comic.owner_id %}
-                <div class="card bg-card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Add a Review</h5>
-                        <form method="post" action="{{ url_for('add_review', comic_id=comic.id) }}">
-                            <div class="mb-3">
-                                <label class="form-label">Rating</label>
-                                <div class="rating-input d-flex">
-                                    {% for i in range(1, 6) %}
-                                    <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
-                                        <label class="form-check-label" for="rating{{ i }}">
-                                            {{ i }}
-                                        </label>
+                <div class="comic-stats mb-3">
+                    <span class="me-3">
+                        <i class="fas fa-star text-warning me-1"></i>
+                        {{ comic.get_average_rating()|round(1) }} ({{ comic.ratings|length }} reviews)
+                    </span>
+                    <span class="me-3">
+                        <i class="fas fa-eye me-1"></i>
+                        {{ comic.views }} views
+                    </span>
+                    <span>
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Uploaded on {{ comic.upload_date.strftime('%B %d, %Y') }}
+                    </span>
+                </div>
+                
+                <div class="comic-author mb-4">
+                    <p>Uploaded by: <strong>{{ owner.username }}</strong></p>
+                </div>
+                
+                <div class="comic-description mb-4">
+                    <h4>Description</h4>
+                    <p>{{ comic.description }}</p>
+                </div>
+                
+                <!-- Reviews Section -->
+                <div class="reviews-section">
+                    <h4>Reviews</h4>
+                    
+                    {% if current_user.is_authenticated and current_user.id != comic.owner_id %}
+                    <div class="card bg-card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Add a Review</h5>
+                            <form method="post" action="{{ url_for('add_review', comic_id=comic.id) }}">
+                                <div class="mb-3">
+                                    <label class="form-label">Rating</label>
+                                    <div class="rating-input d-flex">
+                                        {% for i in range(1, 6) %}
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                                            <label class="form-check-label" for="rating{{ i }}">
+                                                {{ i }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
                                     </div>
-                                    {% endfor %}
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="review_text" class="form-label">Your Review</label>
-                                <textarea class="form-control" id="review_text" name="review_text" rows="3" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit Review</button>
-                        </form>
-                    </div>
-                </div>
-                {% endif %}
-                
-                {% if reviews|length > 0 %}
-                    {% for review in reviews %}
-                    <div class="review-card">
-                        <div class="review-header">
-                            <span class="review-user">
-                                {% set review_user = User.get_by_id(review.user_id) %}
-                                {{ review_user.username if review_user else 'Unknown User' }}
-                            </span>
-                            <span class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</span>
+                                <div class="mb-3">
+                                    <label for="review_text" class="form-label">Your Review</label>
+                                    <textarea class="form-control" id="review_text" name="review_text" rows="3" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                            </form>
                         </div>
-                        <div class="star-rating mb-2">
-                            {% for i in range(5) %}
-                                {% if i < review.rating %}
-                                <i class="fas fa-star"></i>
-                                {% else %}
-                                <i class="far fa-star"></i>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <p>{{ review.text }}</p>
                     </div>
-                    {% endfor %}
-                {% else %}
-                <div class="alert alert-secondary">
-                    No reviews yet. Be the first to review this comic!
+                    {% endif %}
+                    
+                    {% if reviews|length > 0 %}
+                        {% for review in reviews %}
+                        <div class="review-card">
+                            <div class="review-header">
+                                <span class="review-user">
+                                    {% set review_user = User.get_by_id(review.user_id) %}
+                                    <!-- {% set review_user = User.query.get(review.user_id) %} -->
+                                    {{ review_user.username if review_user else 'Unknown User' }}
+                                </span>
+                                <span class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</span>
+                            </div>
+                            <div class="star-rating mb-2">
+                                {% for i in range(5) %}
+                                    {% if i < review.rating %}
+                                    <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p>{{ review.text }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="alert alert-secondary">
+                        No reviews yet. Be the first to review this comic!
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
