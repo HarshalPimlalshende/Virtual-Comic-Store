@@ -1,45 +1,107 @@
-{% extends "layout.html" %}
-
-{% block title %}Register - ComicFlix{% endblock %}
-
+{% extends "layout.html" %} {% block title %}Register - ComicFlix{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card bg-card shadow">
-            <div class="card-body p-4">
-                <h2 class="text-center mb-4">Create an Account</h2>
-                
-                <form method="post" action="{{ url_for('register') }}">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </div>
-                </form>
-                
-                <div class="text-center mt-3">
-                    <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
-                </div>
-            </div>
+  <div class="col-md-6 col-lg-5">
+    <div class="card bg-card shadow">
+      <div class="card-body p-4">
+        <h2 class="text-center mb-4">Create an Account</h2>
+
+        <form
+          method="post"
+          action="{{ url_for('register') }}"
+          onsubmit="return validatePassword()"
+        >
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              required
+              autofocus
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+              title="Must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character"
+            />
+            <small class="text-muted">
+              <br />Password must be at least 8 characters long and <br />
+              include: an.. <br />
+              Uppercase letter />, a lowercase letter.
+              <br />
+              A number,and a special character (@, $, !, %, *, ?, &).
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              class="form-control"
+              id="confirm_password"
+              name="confirm_password"
+              required
+            />
+            <small
+              id="passwordMatchError"
+              class="text-danger"
+              style="display: none"
+            >
+              Passwords do not match!
+            </small>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>
+            Already have an account? <a href="{{ url_for('login') }}">Login</a>
+          </p>
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
+<script>
+  function validatePassword() {
+    var password = document.getElementById("password").value;
+    var confirmPassword = document.getElementById("confirm_password").value;
+    var errorText = document.getElementById("passwordMatchError");
+
+    if (password !== confirmPassword) {
+      errorText.style.display = "block";
+      return false; // Prevent form submission
+    } else {
+      errorText.style.display = "none";
+      return true; // Allow form submission
+    }
+  }
+</script>
 {% endblock %}
