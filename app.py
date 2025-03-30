@@ -1,6 +1,8 @@
 import os
 import logging
 from flask import Flask
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -27,6 +29,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+
 # Initialize SQLAlchemy with the app
 db.init_app(app)
 
@@ -41,9 +44,20 @@ with app.app_context():
     from models import User, Comic, Review
     db.create_all()
 
+# Setup Flask-Admin
+admin = Admin(app, name="Virtual Comic Store - Admin Panel", template_mode="bootstrap3")
+
+# Add views to the admin panel
+admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(Comic, db.session))
+admin.add_view(ModelView(Review, db.session))
+
 # Import routes (after app and db initialization to avoid circular imports)
 from routes import *
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+if __name__ == "__main__":
+    app.run(debug=True)
