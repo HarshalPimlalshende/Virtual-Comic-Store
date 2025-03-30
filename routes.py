@@ -96,7 +96,8 @@ def logout():
 @login_required
 def profile():
     user_comics = Comic.query.filter_by(owner_id=current_user.id).all()
-    return render_template('profile.html', user=current_user, comics=user_comics,Comic = Comic)
+    total_views = sum(comic.views for comic in user_comics)
+    return render_template('profile.html', user=current_user, comics=user_comics,Comic = Comic,total_views = total_views)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
