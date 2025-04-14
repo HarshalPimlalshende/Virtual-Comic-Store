@@ -1,0 +1,48 @@
+{% extends 'admin/master.html' %} {% block body %}
+<div class="container mt-4">
+  <h2>Admin Dashboard</h2>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="alert alert-info">Total Users: {{ user_count }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="alert alert-success">Total Comics: {{ comic_count }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="alert alert-warning">Total Reviews: {{ review_count }}</div>
+    </div>
+  </div>
+
+  <canvas id="myChart" width="400" height="200"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('myChart').getContext('2d');
+  const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: ['Users', 'Comics', 'Reviews'],
+          datasets: [{
+              label: 'App Overview',
+              data: [
+                  {{ user_count | tojson }},
+                  {{ comic_count | tojson }},
+                  {{ review_count | tojson }}
+              ],
+              backgroundColor: ['#17a2b8', '#28a745', '#ffc107']
+          }]
+      },
+      options: {
+          responsive: true,
+          plugins: {
+              legend: {
+                  display: false
+              }
+          }
+      }
+  });
+</script>
+
+{% endblock %}
