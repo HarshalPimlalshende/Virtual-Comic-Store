@@ -103,7 +103,7 @@ with app.app_context():
 
 # Setup Flask-Admin
 admin = Admin(app,
-              name="Virtual Comic Store - Admin Panel",
+              name="Virtual Comic Studio - Admin Panel",
               template_mode="bootstrap3",
               index_view=MyAdminIndexView())
 
